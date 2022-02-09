@@ -14,9 +14,7 @@ Passes request body of https request
 */
 app.use(bodyParser.json());
 
-//Route Handlers
-
-//List Routes
+//Route Handlers for List Routes
 
 /*
 POST /lists - Used to create a list
@@ -69,6 +67,7 @@ app.delete('/lists/:id', (req, res)=>{
 });
 
 
+//Route Handlers for Task Routes
 
 /*
 POST /lists/:listId/tasks - Used to create a new task in a specific list
@@ -76,7 +75,8 @@ Creates a new task in a list specified by listId
 */
 app.post('/list/:listId/tasks', (req, res)=>{
     let newTask = new Task({
-        title:req.body.title
+        title:req.body.title,
+        _listId: req.params.listId
     });
     newTask.save().then((newTaskDoc)=>{
         res.send(newTaskDoc);
@@ -94,6 +94,45 @@ app.get('/lists/:listId/tasks', (req, res)=>{
         res.send(tasks);
     })
 })
+
+//Used to get a specific task in a specific list
+app.get('/lists/:listId/tasks/:taskId', (req, res)=>{
+    Task.findOne({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }).then((task)=>{
+        res.send(task);
+    });
+})
+
+/*
+PATCH /lists/:listId/tasks/:taskId - Used to update a specific task
+Updates a specific task (specified by taskId)
+*/
+app.patch('/list/:listId/tasks/:taskId', (req, res)=>{
+    Task.findOneAndUpdate({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    },{
+        $set: req.body
+        }
+    ).then(()=>{
+        res.sendStatus(200);
+    })
+})
+
+/*
+DELETE /lists/:listId/tasks/:taskId - Used to delete a specified task
+Deletes a specified task
+*/
+app.delete('/lists/:listId/tasks/:taskId', (req, res)=>{
+    List.findOneAndRemove({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }).then((removedTaskDoc)=>{
+        res.send(removedTaskDoc);
+    });
+});
 
 app.listen(3000, ()=>{
     console.log("Server listening on port 3000");
