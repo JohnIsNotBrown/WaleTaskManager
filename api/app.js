@@ -14,7 +14,26 @@ Passes request body of https request
 */
 app.use(bodyParser.json());
 
+
+//CORS Headers middleware
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+
 //Route Handlers for List Routes
+
+
+/*  
+GET /lists - Used to get all the lists 
+Returns an array of all the lists in the database
+*/
+app.get('/lists', (req, res)=>{
+    List.find({}).then((lists)=>{
+        res.send(lists);
+    });
+});
 
 /*
 POST /lists - Used to create a list
@@ -29,16 +48,6 @@ app.post('/lists', (req, res)=>{
     });
     newList.save().then((listDoc)=>{
         res.send(listDoc);
-    });
-});
-
-/*  
-GET /lists - Used to get all the lists 
-Returns an array of all the lists in the database
-*/
-app.get('/lists', (req, res)=>{
-    List.find({}).then((lists)=>{
-        res.send(lists);
     });
 });
 
@@ -66,22 +75,8 @@ app.delete('/lists/:id', (req, res)=>{
     });
 });
 
-
 //Route Handlers for Task Routes
 
-/*
-POST /lists/:listId/tasks - Used to create a new task in a specific list
-Creates a new task in a list specified by listId
-*/
-app.post('/list/:listId/tasks', (req, res)=>{
-    let newTask = new Task({
-        title:req.body.title,
-        _listId: req.params.listId
-    });
-    newTask.save().then((newTaskDoc)=>{
-        res.send(newTaskDoc);
-    });
-});
 
 /*  
 GET /lists/:listId/tasks - Used to get all the tasks in a specific list 
@@ -94,6 +89,20 @@ app.get('/lists/:listId/tasks', (req, res)=>{
         res.send(tasks);
     })
 })
+
+/*
+POST /lists/:listId/tasks - Used to create a new task in a specific list
+Creates a new task in a list specified by listId
+*/
+app.post('/lists/:listId/tasks', (req, res)=>{
+    let newTask = new Task({
+        title:req.body.title,
+        _listId: req.params.listId
+    });
+    newTask.save().then((newTaskDoc)=>{
+        res.send(newTaskDoc);
+    });
+});
 
 //Used to get a specific task in a specific list
 app.get('/lists/:listId/tasks/:taskId', (req, res)=>{
@@ -109,7 +118,7 @@ app.get('/lists/:listId/tasks/:taskId', (req, res)=>{
 PATCH /lists/:listId/tasks/:taskId - Used to update a specific task
 Updates a specific task (specified by taskId)
 */
-app.patch('/list/:listId/tasks/:taskId', (req, res)=>{
+app.patch('/lists/:listId/tasks/:taskId', (req, res)=>{
     Task.findOneAndUpdate({
         _id: req.params.taskId,
         _listId: req.params.listId
